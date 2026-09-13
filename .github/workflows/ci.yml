@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────
+# GitHub Actions workflow file.
+# Lives in .github/workflows/ — GitHub auto-discovers any *.yml here.
+# ─────────────────────────────────────────────────────────────
+
+name: CI  # Shown in the "Actions" tab and on commit status checks.
+
+# WHEN should this run? These are the "triggers" (events).
+on:
+  push:
+    branches: [main]        # run when commits land on main
+  pull_request:             # run on every PR (this is the important one)
+  workflow_dispatch:        # adds a "Run workflow" button for manual runs
+
+jobs:
+  # A "job" is a set of steps that run together on one fresh machine.
+  test:
+    runs-on: ubuntu-latest  # GitHub spins up a clean Ubuntu VM for us.
+
+    # "matrix" = run this same job several times with different inputs.
+    # Here: test against 3 Python versions in parallel. Catches
+    # "works on my machine" version bugs before they hit users.
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.11", "3.12"]
+
+    steps:
+      # Step 1: pull your repo's code onto the VM.
+      - name: Check out code
+        uses: actions/checkout@v4   # "uses" = a prebuilt reusable action.
+
+      # Step 2: install the requested Python version.
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip                # cache deps to make future runs faster
+
+      # Step 3: install dependencies. "run" = a raw shell command.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      # Step 4: lint. Style/quality gate — fails the build on violations.
+      - name: Lint with ruff
+        run: ruff check .
+
+      # Step 5: run tests with coverage. If any test fails, the whole
+      # job goes red and (on a PR) blocks the merge.
+      - name: Run tests
+        run: pytest --cov=calc --cov-report=term-missing

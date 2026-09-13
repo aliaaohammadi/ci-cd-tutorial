@@ -1,0 +1,21 @@
+[project]
+name = "calc"
+version = "0.1.0"
+description = "A tiny calculator to demonstrate CI/CD with GitHub Actions"
+requires-python = ">=3.9"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Tell pytest where the source lives so `import calc` works.
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+# Ruff = fast linter/formatter. CI uses it to enforce style automatically.
+[tool.ruff]
+line-length = 100
