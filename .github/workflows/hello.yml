@@ -1,0 +1,25 @@
+# hello.yml — the smallest useful workflow. Read it top to bottom.
+
+name: Hello            # label shown in the Actions tab
+
+on:                    # WHEN it runs
+  workflow_dispatch:   # only when YOU click "Run workflow" (a manual button)
+
+jobs:
+  say-hello:                   # job name (you pick it)
+    runs-on: ubuntu-latest     # rent a fresh Ubuntu machine
+    steps:
+      - name: Print a greeting
+        run: echo "Hello from my first workflow!"   # just a shell command
+
+      - name: Show where I am and what day it is
+        run: |                 # the | lets you write several lines
+          echo "Current folder:"
+          pwd
+          echo "Date on the robot:"
+          date
+
+      - name: Check out my repo and list the files
+        uses: actions/checkout@v4   # download my code onto the machine
+      - name: List files
+        run: ls -la                 # now the repo files exist, so list them
